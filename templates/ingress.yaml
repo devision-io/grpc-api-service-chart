@@ -23,7 +23,7 @@ spec:
           - path: /
             backend:
               serviceName: {{ $serviceName }}
-              servicePort: {{ $servicePort }}
+              servicePort: 9000
     {{- end -}}
   {{- if .Values.ingress.tls }}
   tls:

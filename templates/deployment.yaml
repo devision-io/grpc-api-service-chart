@@ -1,0 +1,99 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      volumes:
+        - name: devision-token-issuer
+          secret:
+            secretName: devision-token-issuer
+        - name: developer-settings
+          secret:
+            secretName: developer-settings
+      imagePullSecrets:
+        - name: registry-secret
+      containers:
+      - name: esp
+        image: gcr.io/endpoints-release/endpoints-runtime:1
+        args: [
+          "--http_port=9000",
+          "--http2_port=9001",
+          "--backend=grpc://127.0.0.1:{{ .Values.service.internalPort }}",
+          "--service={{ .Values.cloud.service }}.endpoints.{{ .Values.cloud.project }}.cloud.goog",
+          "--service_account_key=/etc/nginx/creds/devision-token-issuer.json",
+          "--rollout_strategy=managed",
+        ]
+        ports:
+          - containerPort: 9000
+          - containerPort: 9001
+        volumeMounts:
+          - mountPath: /etc/nginx/creds
+            name: devision-token-issuer
+            readOnly: true
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- range $var := .Values.image.env }}
+            - name: {{ $var.key }}
+              value: {{ $var.value | quote }}
+            {{- end }}
+        ports:
+          - containerPort: {{ .Values.service.internalPort }}
+          {{- if .Values.prometheus_metrics }}
+          - containerPort: {{ .Values.service.metricsPort }}
+            name: "metrics"
+          {{- end }}
+        volumeMounts:
+          - mountPath: /root/.rwmeta
+            name: developer-settings
+            readOnly: true
+          {{- if .Values.image.volume.enabled }}
+          - mountPath: {{ .Values.image.volume.path }}
+            name: datadir
+          {{- end }}
+          {{- if .Values.image.health_check.enabled }}
+          livenessProbe:
+            initialDelaySeconds: 15
+            periodSeconds: 60
+            timeoutSeconds: 60
+            failureThreshold: 15
+            httpGet:
+              path: {{ .Values.image.health_check.path}}
+              port: {{ .Values.service.internalPort }}
+          {{- end }}
+          {{- if .Values.image.readness_check.enabled }}
+          readinessProbe:
+            initialDelaySeconds: 15
+            periodSeconds: 60
+            timeoutSeconds: 60
+            failureThreshold: 15
+            httpGet:
+              path: {{ .Values.image.readness_check.path}}
+              port: {{ .Values.service.internalPort }}
+          {{- end }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+      {{- if .Values.image.volume.enabled }}
+      volumes:
+      - name: datadir
+        hostPath:
+          # directory location on host
+          path: {{ .Values.image.volume.path }}
+      {{- end }}

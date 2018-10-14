@@ -26,11 +26,11 @@ spec:
         - name: registry-secret
       containers:
       - name: esp
-        image: gcr.io/endpoints-release/endpoints-runtime:1
+        image: apisgarpun/endpoints-runtime:1
         args: [
           "--http_port=9000",
           "--http2_port=9001",
-          "--backend=grpc://127.0.0.1:{{ .Values.service.internalPort }}",
+          "--backend=grpc://127.0.0.1:50051",
           "--service={{ .Values.cloud.service }}.endpoints.{{ .Values.cloud.project }}.cloud.goog",
           "--service_account_key=/etc/nginx/creds/devision-token-issuer.json",
           "--rollout_strategy=managed",
@@ -51,7 +51,7 @@ spec:
             value: {{ $var.value | quote }}
           {{- end }}
         ports:
-          - containerPort: {{ .Values.service.internalPort }}
+          - containerPort: 50051
           {{- if .Values.prometheus_metrics }}
           - containerPort: {{ .Values.service.metricsPort }}
             name: "metrics"

@@ -64,27 +64,27 @@ spec:
           - mountPath: {{ .Values.image.volume.path }}
             name: datadir
           {{- end }}
-          {{- if .Values.image.health_check.enabled }}
-          livenessProbe:
-            initialDelaySeconds: 15
-            periodSeconds: 60
-            timeoutSeconds: 60
-            failureThreshold: 15
-            httpGet:
-              path: {{ .Values.image.health_check.path}}
-              port: {{ .Values.service.internalPort }}
-          {{- end }}
-          {{- if .Values.image.readness_check.enabled }}
-          readinessProbe:
-            initialDelaySeconds: 15
-            periodSeconds: 60
-            timeoutSeconds: 60
-            failureThreshold: 15
-            httpGet:
-              path: {{ .Values.image.readness_check.path}}
-              port: {{ .Values.service.internalPort }}
-          {{- end }}
-          resources:
+        {{- if .Values.image.health_check.enabled }}
+        livenessProbe:
+          initialDelaySeconds: 15
+          periodSeconds: 60
+          timeoutSeconds: 60
+          failureThreshold: 15
+          httpGet:
+            path: {{ .Values.image.health_check.path}}
+            port: {{ .Values.service.internalPort }}
+        {{- end }}
+        {{- if .Values.image.readness_check.enabled }}
+        readinessProbe:
+          initialDelaySeconds: 15
+          periodSeconds: 60
+          timeoutSeconds: 60
+          failureThreshold: 15
+          httpGet:
+            path: {{ .Values.image.readness_check.path}}
+            port: {{ .Values.service.internalPort }}
+        {{- end }}
+        resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- if .Values.nodeSelector }}
       nodeSelector:

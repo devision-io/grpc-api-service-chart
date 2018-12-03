@@ -12,12 +12,6 @@ image:
   volume:
     enabled: true
     path: /tmp
-  health_check:
-    enabled: false
-    path: /health
-  readness_check:
-    enabled: false
-    path: /health
   env:
   - key: ENV
     value: dev

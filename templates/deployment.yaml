@@ -64,26 +64,16 @@ spec:
           - mountPath: {{ .Values.image.volume.path }}
             name: datadir
           {{- end }}
-        {{- if .Values.image.health_check.enabled }}
-        livenessProbe:
-          initialDelaySeconds: 15
-          periodSeconds: 60
-          timeoutSeconds: 60
-          failureThreshold: 15
-          httpGet:
-            path: {{ .Values.image.health_check.path}}
-            port: {{ .Values.service.internalPort }}
-        {{- end }}
-        {{- if .Values.image.readness_check.enabled }}
+        # https://github.com/grpc-ecosystem/grpc-health-probe
         readinessProbe:
-          initialDelaySeconds: 15
-          periodSeconds: 60
-          timeoutSeconds: 60
-          failureThreshold: 15
-          httpGet:
-            path: {{ .Values.image.readness_check.path}}
-            port: {{ .Values.service.internalPort }}
-        {{- end }}
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:50051", "-service=health"]
+          initialDelaySeconds: 5
+        livenessProbe:
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:50051", "-service=health"]
+          initialDelaySeconds: 10
+                /bin/grpc_health_probe -addr=localhost:50051 -service=health
         resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- if .Values.nodeSelector }}

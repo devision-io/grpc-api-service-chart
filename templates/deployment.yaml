@@ -73,7 +73,6 @@ spec:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:50051", "-service=health"]
           initialDelaySeconds: 10
-                /bin/grpc_health_probe -addr=localhost:50051 -service=health
         resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- if .Values.nodeSelector }}

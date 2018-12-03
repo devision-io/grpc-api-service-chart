@@ -34,6 +34,7 @@ spec:
           "--service={{ .Values.cloud.service }}.endpoints.{{ .Values.cloud.project }}.cloud.goog",
           "--service_account_key=/etc/nginx/creds/devision-token-issuer.json",
           "--rollout_strategy=managed",
+          "-z=healthz",
         ]
         ports:
           - containerPort: 9000
@@ -42,6 +43,10 @@ spec:
           - mountPath: /etc/nginx/creds
             name: devision-token-issuer
             readOnly: true
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 9000
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}

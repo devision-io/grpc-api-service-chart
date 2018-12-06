@@ -6,6 +6,6 @@ help:
 	@echo
 
 
-package:
+publish:
 	@echo "building tar file"
 	helm package .

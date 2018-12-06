@@ -34,6 +34,7 @@ spec:
           "--service={{ .Values.cloud.service }}.endpoints.{{ .Values.cloud.project }}.cloud.goog",
           "--service_account_key=/etc/nginx/creds/devision-token-issuer.json",
           "--rollout_strategy=managed",
+          "--disable_trace_sampling=true",
           "-z=healthz",
         ]
         ports:

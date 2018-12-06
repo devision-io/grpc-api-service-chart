@@ -26,7 +26,7 @@ spec:
         - name: registry-secret
       containers:
       - name: esp
-        image: apisgarpun/endpoints-runtime:1
+        image: apisgarpun/endpoints-runtime:1.27
         args: [
           "--http_port=9000",
           "--http2_port=9001",
@@ -34,7 +34,7 @@ spec:
           "--service={{ .Values.cloud.service }}.endpoints.{{ .Values.cloud.project }}.cloud.goog",
           "--service_account_key=/etc/nginx/creds/devision-token-issuer.json",
           "--rollout_strategy=managed",
-          "--disable_trace_sampling=true",
+          "--disable_cloud_trace_auto_sampling",
           "-z=healthz",
         ]
         ports:

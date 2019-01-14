@@ -33,6 +33,7 @@ spec:
           "--backend=grpc://127.0.0.1:50051",
           "--service={{ .Values.cloud.service }}.endpoints.{{ .Values.cloud.project }}.cloud.goog",
           "--service_account_key=/etc/nginx/creds/devision-token-issuer.json",
+          "--service_control_url_override=http://localhost:8989", # skip API Call https://github.com/cloudendpoints/esp/issues/507
           "--rollout_strategy=managed",
           "--disable_cloud_trace_auto_sampling",
           "-z=healthz",
